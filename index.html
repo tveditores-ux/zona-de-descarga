@@ -3,74 +3,101 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GracePrint Kids - Downloads</title>
+  <title>GracePrint Kids</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Nunito', sans-serif; background: #f0f9ff; }
+    body { font-family: 'Nunito', sans-serif; background: linear-gradient(180deg, #E0F7FA 0%, #FFFFFF 100%); min-height: 100vh; }
     .font-bubbly { font-family: 'Fredoka', sans-serif; }
-    .card-zoom:hover img { transform: scale(1.1); }
-    .btn-grad { background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%); }
+    .btn-magic { background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%); transition: all 0.3s ease; }
+    .btn-magic:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0, 114, 255, 0.2); }
+    .hidden { display: none !important; }
   </style>
 </head>
-<body class="pb-20">
+<body>
 
-  <div class="bg-white shadow-sm p-6 mb-8">
-    <div class="max-w-6xl mx-auto flex flex-col items-center">
-      <h1 class="text-3xl font-bold text-blue-600 font-bubbly">GracePrint<span class="text-yellow-500">Kids</span></h1>
-      <p class="text-slate-500 font-bold">Free Bible Stories for You! ✨</p>
+  <div id="loginSection" class="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+    <div class="bg-white p-10 md:p-14 rounded-[3rem] shadow-2xl w-full max-w-md border-4 border-white">
+      <h1 class="text-4xl font-bold text-blue-900 mb-2 font-bubbly">GracePrint<span class="text-yellow-500">Kids</span></h1>
+      <p class="text-slate-500 mb-8 font-bold">Enter your email to download your books!</p>
+      
+      <input type="email" id="userEmail" placeholder="your@email.com" 
+             class="w-full p-5 bg-blue-50 rounded-2xl mb-6 text-center text-xl font-bold text-blue-800 outline-none focus:ring-4 focus:ring-blue-100">
+      
+      <button onclick="accessLibrary()" id="btnEnter" class="w-full btn-magic text-white font-bold py-4 rounded-2xl text-xl uppercase shadow-lg">
+        Enter Library
+      </button>
     </div>
   </div>
 
-  <main class="max-w-6xl mx-auto px-6">
-    <div id="fileList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      <div class="col-span-full text-center py-20">
-        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
-        <p class="text-xl text-blue-400 font-bubbly">Opening the treasure chest...</p>
-      </div>
-    </div>
-  </main>
+  <div id="mainSection" class="hidden">
+    <nav class="p-6 max-w-6xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-900 font-bubbly">GracePrint<span class="text-yellow-500">Kids</span></h1>
+      <button onclick="location.reload()" class="bg-red-50 text-red-400 px-4 py-2 rounded-full font-bold text-sm">Exit</button>
+    </nav>
+
+    <header class="text-center py-6">
+      <h2 class="text-3xl font-bold text-blue-800 font-bubbly">Your Treasure Chest 📚</h2>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-20">
+      <div id="fileList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        </div>
+    </main>
+  </div>
 
   <script>
-    // PASTE YOUR GOOGLE WEB APP URL HERE
-    const API_URL = "YOUR_DEPLOYED_WEB_APP_URL_HERE";
+    // PEGA AQUÍ TU URL DE GOOGLE WEB APP
+    const API_URL = "TU_URL_DE_EJECUCION_AQUI";
 
-    async function loadBooks() {
-      const list = document.getElementById('fileList');
+    async function accessLibrary() {
+      const email = document.getElementById('userEmail').value.trim();
+      const btn = document.getElementById('btnEnter');
+
+      if (!email.includes('@')) {
+        alert("Please enter a valid email! 📧");
+        return;
+      }
+
+      btn.innerText = "Opening... ⏳";
+      btn.disabled = true;
+
       try {
-        const response = await fetch(API_URL);
+        // Llamamos a Google enviando el email como parámetro
+        const response = await fetch(`${API_URL}?email=${encodeURIComponent(email)}`);
         const books = await response.json();
-        
-        if (books.length === 0) {
-          list.innerHTML = '<p class="col-span-full text-center text-slate-400">No books found yet! Check back soon.</p>';
-          return;
-        }
 
-        list.innerHTML = books.map(book => `
-          <div class="card-zoom bg-white rounded-[2.5rem] shadow-xl overflow-hidden border-4 border-white transition-all hover:shadow-2xl">
-            <div class="overflow-hidden h-64 bg-slate-100">
-              <img src="${book.thumbnail}" class="w-full h-full object-cover transition-transform duration-500" alt="${book.name}">
-            </div>
-            <div class="p-6 text-center">
-              <h3 class="font-bold text-xl text-slate-800 mb-4 truncate font-bubbly">${book.name}</h3>
-              <a href="${book.url}" download class="btn-grad block w-full py-4 rounded-2xl text-white font-bold text-lg shadow-lg hover:scale-105 transition-transform">
-                Download PDF ⬇️
-              </a>
-            </div>
-          </div>
-        `).join('');
+        // Cambiamos de pantalla
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('mainSection').classList.remove('hidden');
 
-      } catch (error) {
-        console.error(error);
-        list.innerHTML = `
-          <div class="col-span-full text-center bg-red-50 p-10 rounded-3xl">
-            <p class="text-red-500 font-bold text-xl mb-2">Oops! Something went wrong.</p>
-            <button onclick="location.reload()" class="text-blue-500 underline">Try again</button>
-          </div>`;
+        renderBooks(books);
+      } catch (e) {
+        alert("Error connecting. Please try again.");
+        btn.innerText = "Enter Library";
+        btn.disabled = false;
       }
     }
 
-    loadBooks();
+    function renderBooks(books) {
+      const list = document.getElementById('fileList');
+      if (books.length === 0) {
+        list.innerHTML = '<p class="col-span-full text-center">No books available yet.</p>';
+        return;
+      }
+
+      list.innerHTML = books.map(book => `
+        <div class="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border-4 border-white transition-transform hover:scale-105">
+          <img src="${book.thumbnail}" class="w-full h-56 object-cover bg-slate-100">
+          <div class="p-6 text-center">
+            <h3 class="font-bold text-lg mb-4 truncate font-bubbly">${book.name}</h3>
+            <a href="${book.url}" target="_blank" class="btn-magic block w-full py-3 rounded-2xl text-white font-bold shadow-md">
+              Download ⬇️
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
   </script>
 </body>
 </html>
